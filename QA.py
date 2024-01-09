@@ -1,27 +1,13 @@
-import torch
-import os
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 
-tokenizer = AutoTokenizer.from_pretrained("valhalla/longformer-base-4096-finetuned-squadv1")
-model = AutoModelForQuestionAnswering.from_pretrained("valhalla/longformer-base-4096-finetuned-squadv1")
+def content_aware_Answering(generated_questions, context):
+    from transformers import pipeline
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, 'example.txt')
-with open(file_path, 'r') as file:
-    content = file.read()
+    model_name = "abhitopia/question-answer-generation"
+    nlp = pipeline("text2text-generation", model=model_name, tokenizer=model_name)
 
-question = "Who was Alan Taylor?"
-encoding = tokenizer(question, content, return_tensors="pt")
-input_ids = encoding["input_ids"]
+    generated_questions = ['What year did the War of 1812 begin?', 'Who opposed U S colonial settlement in the Old Northwest?', 'When did the U.S. begin to fight?', 'What was the name of the convention held by the Federalists in December?']
 
-# default is local attention everywhere
-# the forward method will automatically set global attention on question tokens
-attention_mask = encoding["attention_mask"]
-
-start_scores, end_scores = model(input_ids, attention_mask=attention_mask)
-all_tokens = tokenizer.convert_ids_to_tokens(input_ids[0].tolist())
-
-answer_tokens = all_tokens[torch.argmax(start_scores) :torch.argmax(end_scores)+1]
-answer = tokenizer.decode(tokenizer.convert_tokens_to_ids(answer_tokens))
-# output => democratized NLP
-print(answer)
+    for question in generated_questions:
+        prompt = f"question: {question} context: {content} </s>"
+        output = nlp(prompt)
+        print(f"Question: {question}\nAnswer: {output[0]['generated_text']}\n")

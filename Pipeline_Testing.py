@@ -2,6 +2,7 @@ from transformers import pipeline
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
 import torch
 import torch.nn.functional as F
+import os
 
 model_name = "distilbert-base-uncased-finetuned-sst-2-english"
 
